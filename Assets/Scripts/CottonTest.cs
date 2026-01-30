@@ -38,7 +38,7 @@ public class CottonTest : MonoBehaviour,
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (currentSwab != null) return;
+        if (currentSwab != null || state == CottonState.Finished) return;
 
         GameObject swabObj = Instantiate(cottonSwabPrefab, canvas.transform);
         currentSwab = swabObj.GetComponent<RectTransform>();
@@ -73,6 +73,10 @@ public class CottonTest : MonoBehaviour,
         if (state == CottonState.Checking && IsOverlapping(currentSwab, testKitArea))
         {
             FinishTest();
+        }
+        if(state != CottonState.Finished && !isDragging)
+        {
+            Destroy(currentSwab.gameObject);
         }
     }
 

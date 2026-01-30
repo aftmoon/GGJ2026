@@ -6,18 +6,24 @@ using UnityEngine.EventSystems;
 public class Phone : MonoBehaviour, IPointerClickHandler
 {
     [Header("Phone UI")]
+    public GameObject phoneScreen;
     public GameObject phoneMask;   // 全屏遮罩
     public GameObject phonePanel;  // 手机界面
     public GameObject ContactListPanel; //消息列表
+    public GameObject ChatPanel;
+
 
     // 点击手机
     public void OnPointerClick(PointerEventData eventData)
     {
+        
         OpenPhone();
     }
 
     public void OpenPhone()
     {
+        ChatPanel.SetActive(false);
+        phoneScreen.SetActive(true);
         phoneMask.SetActive(true);
         phonePanel.SetActive(true);
         ContactListPanel.SetActive(true);
@@ -26,8 +32,11 @@ public class Phone : MonoBehaviour, IPointerClickHandler
     // 点击遮罩时调用
     public void ClosePhone()
     {
+        phoneScreen.SetActive(false);
         phoneMask.SetActive(false);
         phonePanel.SetActive(false);
         ContactListPanel.SetActive(false);
+        ChatPanel.SetActive(false);
+
     }
 }

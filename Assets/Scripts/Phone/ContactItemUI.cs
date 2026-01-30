@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class ContactItemUI : MonoBehaviour
+public class ContactItemUI : MonoBehaviour, IPointerClickHandler
 {
     public TMP_Text remarkText;
     public GameObject redDot;
@@ -21,8 +19,9 @@ public class ContactItemUI : MonoBehaviour
         redDot.SetActive(data.hasUnread);
     }
 
-    public void OnClick()
+    public void OnPointerClick(PointerEventData eventData)
     {
+        Debug.Log("´ò¿ªÁÄÌì£º" + contact.remark);
         manager.OpenChat(contact);
     }
 }

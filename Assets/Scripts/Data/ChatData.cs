@@ -13,4 +13,5 @@ public class ChatContact
     public string remark;                 // 备注名
     public bool hasUnread;                // 是否未回复（红点）
     public List<ChatMessage> messages;    // 聊天记录
+    public bool isReplied;
 }

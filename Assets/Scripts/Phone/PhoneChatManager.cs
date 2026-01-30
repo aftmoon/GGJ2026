@@ -12,6 +12,7 @@ public class PhoneChatManager : MonoBehaviour
     public GameObject contactItemPrefab;
 
     [Header("Chat UI")]
+    public GameObject ContactListPanel;
     public GameObject chatPanel;
     public TMP_Text remarkTitle;
     public Transform chatContent;
@@ -45,9 +46,11 @@ public class PhoneChatManager : MonoBehaviour
     {
         currentContact = contact;
         contact.hasUnread = false;
+        
 
         remarkTitle.text = contact.remark;
         chatPanel.SetActive(true);
+        ContactListPanel.SetActive(false);
 
         RefreshChat();
         RefreshContactList();
@@ -57,11 +60,17 @@ public class PhoneChatManager : MonoBehaviour
 
     void RefreshChat()
     {
+        Debug.Log("RefreshChat called");
+
         foreach (Transform t in chatContent)
             Destroy(t.gameObject);
 
+        Debug.Log("消息数量: " + currentContact.messages.Count);
+
         foreach (var msg in currentContact.messages)
         {
+            Debug.Log("生成气泡: " + msg.content + " isSelf=" + msg.isSelf);
+
             var prefab = msg.isSelf ? rightBubblePrefab : leftBubblePrefab;
             var bubble = Instantiate(prefab, chatContent);
             bubble.GetComponent<ChatBubbleUI>().Set(msg.content);
@@ -76,10 +85,29 @@ public class PhoneChatManager : MonoBehaviour
 
         currentContact.messages.Add(new ChatMessage
         {
-            content = "收到",
+            content = "Got it",
             isSelf = true
         });
+        currentContact.isReplied = true;
+        Debug.Log("回复成功");
 
         RefreshChat();
+    }
+
+    public void Back()
+    {
+        chatPanel.SetActive(false);
+        ContactListPanel.SetActive(true);
+    }
+
+    public int GetUnrepliedCount()
+    {
+        int count = 0;
+        foreach (var c in contacts)
+        {
+            if (c.isReplied == false)
+                count++;
+        }
+        return count;
     }
 }
