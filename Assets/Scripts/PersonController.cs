@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PersonController : MonoBehaviour
 {
+    public RectTransform humanArea;
     public PersonData data;
     public float moveSpeed = 1200f; // UI ÓÃÏñËØËÙ¶È
 

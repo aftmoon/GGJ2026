@@ -18,6 +18,11 @@ public class LevelPersonManager : MonoBehaviour
 
     public PhoneChatManager phoneChatManager;
 
+    [Header("钟表")]
+    public RectTransform clockHand;   // 指针
+    public float startAngle = 0f;   // 9:00
+    public float endAngle = -270f;    // 17:00
+
     [Header("生成设置")]
     public int personCount = 10;
 
@@ -29,6 +34,9 @@ public class LevelPersonManager : MonoBehaviour
     public Transform passPoint;
     public Transform failPoint;
     public GameObject personPrefab;
+
+    [Header("温度计")]
+    public TemTest thermometer;
 
     int currentIndex = 0;
     PersonController currentNPC;
@@ -96,6 +104,8 @@ public class LevelPersonManager : MonoBehaviour
             return;
         }
 
+        UpdateClock();
+
         GameObject go = Instantiate(personPrefab, spawnPoint.parent);
         go.transform.SetAsLastSibling();
 
@@ -105,7 +115,9 @@ public class LevelPersonManager : MonoBehaviour
         currentNPC = go.GetComponent<PersonController>();
         currentNPC.Init(persons[currentIndex]);
         isPersonMoving = false;
+        thermometer.SetHumanArea(currentNPC.humanArea);
     }
+
 
     public void OnPassButton()
     {
@@ -170,5 +182,15 @@ public class LevelPersonManager : MonoBehaviour
         failText.text = $"interceptions:{failCount}";
         wrongText.text = $"incorrect judgments:{wrongCount}";
         missMessageText.text = $"Missed message:{missMessageCount}";
+    }
+
+    void UpdateClock()
+    {
+        if (clockHand == null) return;
+
+        float progress = (float)currentIndex / personCount;
+        float angle = Mathf.Lerp(startAngle, endAngle, progress);
+
+        clockHand.localRotation = Quaternion.Euler(0, 0, angle);
     }
 }
