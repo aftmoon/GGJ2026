@@ -1,129 +1,128 @@
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
+using UnityEngine.EventSystems;
+using System.Collections;
+using UnityEngine.Rendering;
 
-public class ButtonHoldEffect : MonoBehaviour
+public class ButtonHoldFear : MonoBehaviour,
+    IPointerDownHandler,
+    IPointerUpHandler,
+    IPointerExitHandler
 {
-    public Button button;              // 需要监测的按钮
-    public Image targetImage;          // 需要改变 alpha 的图片
-    public AnimationClip shakeAnimClip; // 按钮的颤抖动画
-    public float holdTime = 3f;        // 长按时长，3秒
-    private float currentHoldTime = 0f;
-    private bool isHolding = false;
-    private bool hasPlayedAnimation = false;
+    [Header("References")]
+    public Image targetImage;          // alpha 变化 + 变黑
+    public RectTransform buttonRect;   // Button 自身
+    public Animator buttonAnimator;    // 完成时播放动画（可选）
+    public GameObject startPanel;    // 完成时播放动画（可选）
 
-    private Animator buttonAnimator;    // 按钮的 Animator，用于播放颤抖动画
+    [Header("Hold Settings")]
+    public float holdDuration = 3f;
+    public string finishTrigger = "Finish";
 
-    private void Start()
+    [Header("Fear Shake Settings")]
+    public float minShake = 2f;
+    public float maxShake = 10f;
+
+    Coroutine holdCo;
+    Coroutine shakeCo;
+
+    Vector2 originPos;
+    bool finished;
+    float holdProgress; // 0~1
+
+    void Awake()
     {
-        buttonAnimator = button.GetComponent<Animator>();
-        if (buttonAnimator == null)
-        {
-            Debug.LogError("Button does not have an Animator component!");
-        }
-
-        // 初始时将目标图片 alpha 设置为 0
-        if (targetImage != null)
-        {
-            Color tempColor = targetImage.color;
-            tempColor.a = 0f;
-            targetImage.color = tempColor;
-        }
-        
-        // 按钮的点击事件
-        button.onClick.AddListener(OnButtonClick);
+        originPos = buttonRect.anchoredPosition;
+        SetAlpha(0f);
     }
 
-    private void Update()
+    // ================= Pointer =================
+
+    public void OnPointerDown(PointerEventData eventData)
     {
-        // 监测鼠标是否按住按钮
-        if (isHolding)
-        {
-            currentHoldTime += Time.deltaTime;
+        if (finished) return;
 
-            // 目标图片的 alpha 从 0 到 1 渐变
-            if (targetImage != null)
-            {
-                float alpha = Mathf.Clamp01(currentHoldTime / holdTime);
-                Color tempColor = targetImage.color;
-                tempColor.a = alpha;
-                targetImage.color = tempColor;
-            }
-
-            // 如果已达到 3 秒，播放按钮动画并且将图片变黑
-            if (currentHoldTime >= holdTime && !hasPlayedAnimation)
-            {
-                PlayButtonAnimation();
-                SetImageBlack();
-                hasPlayedAnimation = true; // 防止多次播放动画
-            }
-        }
-
-        // 处理鼠标是否按下（开始长按）
-        if (Input.GetMouseButtonDown(0) && button.GetComponent<RectTransform>().rect.Contains(Input.mousePosition))
-        {
-            isHolding = true;
-            currentHoldTime = 0f; // 重置计时
-            StartButtonShake();
-        }
-
-        // 鼠标松开时停止
-        if (Input.GetMouseButtonUp(0))
-        {
-            isHolding = false;
-            StopButtonShake();
-            ResetImageAlpha();
-        }
+        holdCo = StartCoroutine(HoldRoutine());
+        shakeCo = StartCoroutine(FearShakeRoutine());
     }
 
-    private void StartButtonShake()
+    public void OnPointerUp(PointerEventData eventData)
     {
-        // 使用 DoTween 实现按钮的颤抖动画
-        if (button != null)
-        {
-            button.transform.DOShakePosition(0.3f, 10f, 20, 90, false, true);
-        }
+        Cancel();
     }
 
-    private void StopButtonShake()
+    public void OnPointerExit(PointerEventData eventData)
     {
-        // 停止按钮的颤抖动画
-        if (button != null)
-        {
-            button.transform.DOKill(); // 停止当前所有的 DoTween 动画
-        }
+        Cancel();
     }
 
-    private void PlayButtonAnimation()
+    // ================= Core =================
+
+    IEnumerator HoldRoutine()
     {
-        // 播放按钮动画
+        float t = 0f;
+
+        while (t < holdDuration)
+        {
+            t += Time.deltaTime;
+            holdProgress = Mathf.Clamp01(t / holdDuration);
+            SetAlpha(holdProgress);
+            yield return null;
+        }
+
+        // 完成
+        finished = true;
+        SetAlpha(1f);
+        StopShake();
+
         if (buttonAnimator != null)
+            buttonAnimator.SetTrigger(finishTrigger);
+
+        // 等动画（假设 1 秒）
+        yield return new WaitForSeconds(3f);
+
+        //targetImage.color = Color.black;
+        Destroy(startPanel);
+    }
+
+    IEnumerator FearShakeRoutine()
+    {
+        while (true)
         {
-            buttonAnimator.Play(shakeAnimClip.name);
+            // 晃动强度随进度增强
+            float strength = Mathf.Lerp(minShake, maxShake, holdProgress);
+
+            // 完全随机、不规则 → 恐惧感
+            Vector2 offset = 3*Random.insideUnitCircle * strength;
+            buttonRect.anchoredPosition = originPos + offset;
+
+            // 不规则间隔（关键！）
+            yield return new WaitForSeconds(Random.Range(0.02f, 0.08f));
         }
     }
 
-    private void SetImageBlack()
+    // ================= Helpers =================
+
+    void Cancel()
     {
-        // 使用 DoTween 修改图片颜色变黑
-        if (targetImage != null)
-        {
-            targetImage.DOColor(Color.black, 1f); // 在 1 秒内将图片变为黑色
-        }
+        if (finished) return;
+
+        if (holdCo != null) StopCoroutine(holdCo);
+        StopShake();
+        holdProgress = 0f;
+        SetAlpha(0f);
     }
 
-    private void ResetImageAlpha()
+    void StopShake()
     {
-        // 使用 DoTween 恢复图片透明度
-        if (targetImage != null)
-        {
-            targetImage.DOFade(0f, 0.3f); // 在 0.3 秒内将图片的透明度恢复为 0
-        }
+        if (shakeCo != null) StopCoroutine(shakeCo);
+        buttonRect.anchoredPosition = originPos;
     }
 
-    private void OnButtonClick()
+    void SetAlpha(float a)
     {
-        // 如果点击事件中有其他处理，可以在这里处理
-        Debug.Log("Button clicked");
+        Color c = targetImage.color;
+        c.a = a;
+        targetImage.color = c;
     }
 }
