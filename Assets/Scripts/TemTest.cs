@@ -15,7 +15,6 @@ public class TemTest : MonoBehaviour,
     public RectTransform humanArea;
 
     [Header("Temperature")]
-    public float humanTemperature = 36.8f;
     public float feverThreshold = 38f;
 
     [Header("Thermometer UI")]
@@ -37,7 +36,7 @@ public class TemTest : MonoBehaviour,
 
     private int originalSiblingIndex; //记录原始层级
 
-    PersonController currentPerson;
+    [SerializeField]PersonController currentPerson;
 
     private void Awake()
     {
@@ -62,9 +61,13 @@ public class TemTest : MonoBehaviour,
 
         rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
 
+        TryFindPersonUnderThermometer();
+
         // 拖到人身上时检测一次
         if (!isChecking && IsOverlapping(rectTransform, humanArea))
         {
+            
+            currentPerson = humanArea.GetComponentInParent<PersonController>();
             CheckTemperature();
         }
     }
@@ -85,10 +88,13 @@ public class TemTest : MonoBehaviour,
 
     private void CheckTemperature()
     {
+        //Debug.Log("测体温");
+        if (currentPerson == null) return;
+        
         isChecking = true;
 
-        float temp = humanTemperature;
-        //temperatureText.text = temp.ToString("F1") + "°C";
+        float temp = currentPerson.data.temperature;
+        Debug.Log(temp);
 
         if (temp >= feverThreshold)
         {
@@ -142,5 +148,28 @@ public class TemTest : MonoBehaviour,
     public void SetHumanArea(RectTransform area)
     {
         humanArea = area;
+    }
+
+    private void TryFindPersonUnderThermometer()
+    {
+        PointerEventData pointerData = new PointerEventData(EventSystem.current);
+        pointerData.position = RectTransformUtility.WorldToScreenPoint(
+            canvas.worldCamera,
+            rectTransform.position
+        );
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (var result in results)
+        {
+            PersonController person = result.gameObject.GetComponentInParent<PersonController>();
+            if (person != null)
+            {
+                currentPerson = person;
+                humanArea = person.humanArea;
+                return;
+            }
+        }
     }
 }

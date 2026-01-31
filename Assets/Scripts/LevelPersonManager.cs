@@ -37,6 +37,7 @@ public class LevelPersonManager : MonoBehaviour
 
     [Header("ÎÂ¶È¼Æ")]
     public TemTest thermometer;
+    public CottonTest cottonTest;
 
     int currentIndex = 0;
     PersonController currentNPC;
@@ -115,7 +116,14 @@ public class LevelPersonManager : MonoBehaviour
         currentNPC = go.GetComponent<PersonController>();
         currentNPC.Init(persons[currentIndex]);
         isPersonMoving = false;
+
         thermometer.SetHumanArea(currentNPC.humanArea);
+        cottonTest.SetHumanArea(currentNPC.humanArea);
+
+        cottonTest.ResetForNextPerson(
+            currentNPC.humanArea,
+            currentNPC.GetComponent<Animator>()
+        );
     }
 
 

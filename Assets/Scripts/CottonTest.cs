@@ -17,6 +17,7 @@ public class CottonTest : MonoBehaviour,
     [Header("Test Kit UI Image")]
     public RectTransform testKitArea;
     public Image testKitImage;
+    public Sprite testKitBeforeSprite;
     public Sprite testKitAfterSprite;
 
     private RectTransform currentSwab;
@@ -107,7 +108,7 @@ public class CottonTest : MonoBehaviour,
         Destroy(currentSwab.gameObject);
         currentSwab = null;
 
-        Debug.Log("核算检测完成。");
+        Debug.Log("核酸检测完成。");
     }
 
     // ========================= 工具方法 =========================
@@ -138,5 +139,35 @@ public class CottonTest : MonoBehaviour,
 
         Vector2 size = corners[2] - corners[0];
         return new Rect(corners[0], size);
+    }
+
+    public void SetHumanArea(RectTransform area)
+    {
+        humanArea = area;
+    }
+
+    public void ResetForNextPerson(RectTransform newHumanArea, Animator newAnimator)
+    {
+        // 重置状态
+        state = CottonState.None;
+        isDragging = false;
+
+        // 清理残留棉签
+        if (currentSwab != null)
+        {
+            Destroy(currentSwab.gameObject);
+            currentSwab = null;
+        }
+
+        if (testKitImage != null && testKitBeforeSprite != null)
+        {
+            testKitImage.sprite = testKitBeforeSprite;
+        }
+
+        // 绑定新的人
+        humanArea = newHumanArea;
+        humanAnimator = newAnimator;
+
+        Debug.Log("棉签检测已重置，准备检测下一个人");
     }
 }

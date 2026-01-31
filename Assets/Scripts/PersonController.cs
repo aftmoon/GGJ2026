@@ -1,11 +1,13 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PersonController : MonoBehaviour
 {
     public RectTransform humanArea;
     public PersonData data;
     public float moveSpeed = 1200f; // UI 用像素速度
+    public Image mask;
 
     RectTransform rt;
 
@@ -17,6 +19,14 @@ public class PersonController : MonoBehaviour
     public void Init(PersonData personData)
     {
         data = personData;
+        if (data.hasMask == true)
+        {
+            mask.gameObject.SetActive(true);
+        }
+        else
+        {
+            mask.gameObject.SetActive(false);
+        }
         // TODO：更新人物头顶UI / 颜色 / 状态
     }
 
