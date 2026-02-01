@@ -119,7 +119,7 @@ public class LevelPersonManager : MonoBehaviour
         UpdateClock();
 
         GameObject go = Instantiate(personPrefab, spawnPoint.parent);
-        go.transform.SetAsLastSibling();
+        go.transform.SetSiblingIndex(spawnPoint.GetSiblingIndex());
 
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = ((RectTransform)spawnPoint).anchoredPosition;
@@ -163,9 +163,9 @@ public class LevelPersonManager : MonoBehaviour
 
         waitingForResultClick = false;
 
-        if (NPCPhone != null)
+        if (Phone != null)
         {
-            NPCPhone.StopVibration();
+            Phone.StopVibration();
         }
 
         ShowResult();

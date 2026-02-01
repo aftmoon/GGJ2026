@@ -17,6 +17,10 @@ public class LevelManager : MonoBehaviour
 
     public LevelPersonManager levelPersonManager;
 
+    [Header("过场动画")]
+    public GameObject cutscene;
+    public CutsceneController cutsceneController;
+
     private void Awake()
     {
         Instance = this;
@@ -37,6 +41,11 @@ public class LevelManager : MonoBehaviour
 
         currentLevelIndex = index;
         LevelConfig config = levels[index];
+
+        if(cutsceneController != null)
+        {
+            cutsceneController.ShowCutsceneByLevel(index);
+        }
 
         // 先全部关闭
         maskCheck.SetActive(false);
@@ -71,6 +80,7 @@ public class LevelManager : MonoBehaviour
 
     public void NextLevel()
     {
+        cutscene.SetActive(true);
         if (currentLevelIndex + 1 >= levels.Count)
         {
             Debug.Log("所有关卡结束");
@@ -82,5 +92,10 @@ public class LevelManager : MonoBehaviour
         {
             levelPersonManager.ResetForNewLevel();
         }
+    }
+
+    public void CutSceneDisppear()
+    {
+        cutscene.SetActive(false);
     }
 }
