@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &9171387288197131677
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6192563267670256373}
+  - component: {fileID: 4583991498388365456}
+  m_Layer: 0
+  m_Name: LevelManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6192563267670256373
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9171387288197131677}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4583991498388365456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9171387288197131677}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 71075ec8daf470e48b17730b247cc5d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  phoneScreen: {fileID: 0}
+  levels:
+  - levelIndex: 0
+    enabledChecks: 00000000
+  - levelIndex: 1
+    enabledChecks: 0000000001000000
+  - levelIndex: 2
+    enabledChecks: 0000000001000000
+  - levelIndex: 3
+    enabledChecks: 0000000002000000
+  - levelIndex: 4
+    enabledChecks: 0000000002000000
+  - levelIndex: 5
+    enabledChecks: 0000000003000000
+  - levelIndex: 6
+    enabledChecks: 000000000100000003000000
+  - levelIndex: 7
+    enabledChecks: 000000000100000002000000
+  - levelIndex: 8
+    enabledChecks: 000000000100000002000000
+  - levelIndex: 9
+    enabledChecks: 000000000100000002000000
+  - levelIndex: 10
+    enabledChecks: 00000000010000000200000003000000
+  - levelIndex: 11
+    enabledChecks: 00000000010000000200000003000000
+  - levelIndex: 12
+    enabledChecks: 00000000010000000200000003000000
+  currentLevelIndex: 0
+  maskCheck: {fileID: 0}
+  temperatureCheck: {fileID: 0}
+  nucleicCheck: {fileID: 0}
+  healthCodeCheck: {fileID: 0}
+  levelPersonManager: {fileID: 0}
+  cutscene: {fileID: 0}
+  cutsceneController: {fileID: 0}
