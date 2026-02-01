@@ -50,6 +50,7 @@ public class LevelPersonManager : MonoBehaviour
     PersonController currentNPC;
 
     bool isPersonMoving = false;
+    public Transform background1;
 
     private void Start()
     {
@@ -119,7 +120,9 @@ public class LevelPersonManager : MonoBehaviour
         UpdateClock();
 
         GameObject go = Instantiate(personPrefab, spawnPoint.parent);
-        go.transform.SetSiblingIndex(spawnPoint.GetSiblingIndex());
+        // ≤ÂµΩ BackGround(1) ∫Û√Ê
+        int targetIndex = background1.GetSiblingIndex() + 1;
+        go.transform.SetSiblingIndex(targetIndex);
 
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchoredPosition = ((RectTransform)spawnPoint).anchoredPosition;

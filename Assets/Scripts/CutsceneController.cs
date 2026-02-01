@@ -1,11 +1,12 @@
-using System.Collections;
+锘縰sing System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CutsceneController : MonoBehaviour
 {
     public Transform mid;
     public string enterStateName = "Enter";
-    public float fadeDuration = 0.5f;  // 渐变时间
+    public float fadeDuration = 0.5f;  // 娓愬彉鏃堕棿
 
     private Coroutine fadeCoroutine;
 
@@ -13,63 +14,42 @@ public class CutsceneController : MonoBehaviour
     {
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
+        //if (gameObject.activeSelf && levelIndex > 0) fadeCoroutine = StartCoroutine(FadeInAfterAnimation(levelIndex - 1));
+        if (levelIndex > 0) fadeCoroutine = StartCoroutine(FadeInAfterAnimation(levelIndex - 1));
 
-        fadeCoroutine = StartCoroutine(FadeInAfterAnimation(levelIndex - 1));
     }
 
     private IEnumerator FadeInAfterAnimation(int targetIndex)
     {
-        // 新 cutscene
+        if (targetIndex < 0 || targetIndex >= mid.childCount)
+            yield break;
+
         GameObject to = mid.GetChild(targetIndex).gameObject;
-        CanvasGroup toGroup = to.GetComponent<CanvasGroup>();
-        if (toGroup == null)
-            toGroup = to.AddComponent<CanvasGroup>();
 
-        // 激活并初始化透明度
+        //CanvasGroup toGroup = to.GetComponent<CanvasGroup>();
+        //if (toGroup == null)
+        //    toGroup = to.AddComponent<CanvasGroup>();
+
         to.SetActive(true);
-        toGroup.alpha = 0f;
-        toGroup.interactable = false;
-        toGroup.blocksRaycasts = false;
+        Image img = to.GetComponent<Image>();
+        if (img == null)
+            yield break;
 
-        // 播放 Animator 并等待动画结束
-        Animator animator = to.GetComponent<Animator>();
-        if (animator != null)
-        {
-            animator.Play(enterStateName, 0, 0f);
-
-            // 获取动画长度
-            float clipLength = 0f;
-            if (animator.runtimeAnimatorController != null && animator.runtimeAnimatorController.animationClips.Length > 0)
-            {
-                foreach (var clip in animator.runtimeAnimatorController.animationClips)
-                {
-                    if (clip.name == enterStateName)
-                    {
-                        clipLength = clip.length;
-                        break;
-                    }
-                }
-            }
-
-            // 等待动画播放完
-            yield return new WaitForSeconds(clipLength);
-        }
-
-        // 动画播完后开始渐变 alpha 0 → 1
+        // 纭繚鍒濆鏄畬鍏ㄤ笉閫忔槑
+        Color c = img.color;
+        c.a = 0f;
+        img.color = c;
+       
         float t = 0f;
         while (t < fadeDuration)
         {
             t += Time.deltaTime;
-            float p = t / fadeDuration;
-            toGroup.alpha = p;
+            c.a = Mathf.Lerp(0, 1, t / fadeDuration);
+            img.color = c;
             yield return null;
         }
 
-        // 渐变结束，保持 alpha = 1
-        toGroup.alpha = 1f;
-        toGroup.interactable = true;
-        toGroup.blocksRaycasts = true;
-
-        fadeCoroutine = null;
+        c.a = 1f;
+        img.color = c;
     }
 }
