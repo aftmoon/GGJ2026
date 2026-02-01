@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
+    public GameObject phoneScreen;
     public static LevelManager Instance;
 
     public List<LevelConfig> levels;
@@ -42,6 +43,8 @@ public class LevelManager : MonoBehaviour
         temperatureCheck.SetActive(false);
         nucleicCheck.SetActive(false);
         healthCodeCheck.SetActive(false);
+        
+        phoneScreen.SetActive(false);
 
         // 再根据配置开启
         foreach (var item in config.enabledChecks)

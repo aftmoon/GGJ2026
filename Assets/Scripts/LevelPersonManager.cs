@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class LevelPersonManager : MonoBehaviour
 {
+    [Header("关卡结束-手机提示")]
+    public Phone Phone;   
+    private bool waitingForResultClick = false;
+
     [Header("结算统计")]
     public int passCount;
     public int failCount;
@@ -108,7 +112,7 @@ public class LevelPersonManager : MonoBehaviour
         if (currentIndex >= persons.Count)
         {
             Debug.Log("本关结束");
-            ShowResult();
+            OnLevelFinished();
             return;
         }
 
@@ -142,6 +146,30 @@ public class LevelPersonManager : MonoBehaviour
         );
     }
 
+    void OnLevelFinished()
+    {
+        waitingForResultClick = true;
+
+        // 播放手机震动动画
+        if (Phone != null)
+        {
+            Phone.PlayVibration();
+        }
+    }
+
+    public void OnPhoneClicked()
+    {
+        if (!waitingForResultClick) return;
+
+        waitingForResultClick = false;
+
+        if (NPCPhone != null)
+        {
+            NPCPhone.StopVibration();
+        }
+
+        ShowResult();
+    }
 
     public void OnPassButton()
     {

@@ -20,6 +20,19 @@ public class Phone : MonoBehaviour, IPointerClickHandler
 
     private PersonData currentNPCData;  // 当前 NPC 的数据
 
+    [Header("震动参数")]
+    public float shakeStrength = 30f;     // 抖动幅度（UI建议 5~15）
+    public float shakeInterval = 0.02f;  // 抖动频率
+
+    Vector3 originPos;
+    Coroutine shakeCoroutine;
+
+    void Awake()
+    {
+        originPos = transform.localPosition;
+    }
+
+
 
     // 点击手机
     public void OnPointerClick(PointerEventData eventData)
@@ -78,5 +91,47 @@ public class Phone : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    // 开始震动
+    public void PlayVibration()
+    {
+        if (shakeCoroutine != null) return;
 
+        originPos = transform.localPosition;
+        shakeCoroutine = StartCoroutine(Shake());
+    }
+
+    // 停止震动
+    public void StopVibration()
+    {
+        if (shakeCoroutine != null)
+        {
+            StopCoroutine(shakeCoroutine);
+            shakeCoroutine = null;
+        }
+
+        transform.localPosition = originPos;
+    }
+
+    IEnumerator Shake()
+    {
+        while (true)
+        {
+            Vector2 offset = Random.insideUnitCircle * shakeStrength;
+            transform.localPosition = originPos + new Vector3(offset.x, offset.y, 0);
+
+            yield return new WaitForSeconds(shakeInterval);
+        }
+    }
+
+    // 给 Button / EventTrigger 用
+    public void OnClick()
+    {
+        LevelPersonManager mgr = FindObjectOfType<LevelPersonManager>();
+        if (mgr != null)
+        {
+            mgr.OnPhoneClicked();
+        }
+    }
 }
+
+
