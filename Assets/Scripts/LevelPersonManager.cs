@@ -39,6 +39,9 @@ public class LevelPersonManager : MonoBehaviour
     public TemTest thermometer;
     public CottonTest cottonTest;
 
+    [Header("健康码")]
+    public Phone NPCPhone;
+
     int currentIndex = 0;
     PersonController currentNPC;
 
@@ -80,21 +83,25 @@ public class LevelPersonManager : MonoBehaviour
             : NucleicResult.Positive;
 
         // 健康码（根据核酸 & 体温决定）
-        p.healthCode = CalculateHealthCode(p);
+        p.healthCode = Random.value < 0.7f
+            ? HealthCode.Green   // 70% 概率为 Green
+            : (Random.value < 0.285f  // 剩下的 30% 里，20% 可能是 Yellow，10% 可能是 Red
+                ? HealthCode.Yellow  // 20% 概率为 Yellow
+                : HealthCode.Red);   // 10% 概率为 Red
 
         return p;
     }
 
-    HealthCode CalculateHealthCode(PersonData p)
-    {
-        if (p.nucleic == NucleicResult.Positive || p.temperature >= 38f)
-            return HealthCode.Red;
+    //HealthCode CalculateHealthCode(PersonData p)
+    //{
+    //    if (p.nucleic == NucleicResult.Positive || p.temperature >= 38f)
+    //        return HealthCode.Red;
 
-        if (p.temperature >= 37.3f)
-            return HealthCode.Yellow;
+    //    if (p.temperature >= 37.3f)
+    //        return HealthCode.Yellow;
 
-        return HealthCode.Green;
-    }
+    //    return HealthCode.Green;
+    //}
 
     void ShowNextPerson()
     {
@@ -115,14 +122,23 @@ public class LevelPersonManager : MonoBehaviour
 
         currentNPC = go.GetComponent<PersonController>();
         currentNPC.Init(persons[currentIndex]);
+
+        // 获取到 NpcPhone 并设置当前 NPC 数据
+        if (NPCPhone != null)
+        {
+            NPCPhone.SetNpcData(currentNPC.data); // 设置 NPC 数据，自动更新健康码方块的颜色
+        }
+
         isPersonMoving = false;
 
         thermometer.SetHumanArea(currentNPC.humanArea);
         cottonTest.SetHumanArea(currentNPC.humanArea);
 
+
         cottonTest.ResetForNextPerson(
             currentNPC.humanArea,
-            currentNPC.GetComponent<Animator>()
+            currentNPC.GetComponent<Animator>(),
+            currentNPC.data
         );
     }
 
@@ -137,10 +153,10 @@ public class LevelPersonManager : MonoBehaviour
         passCount++;
 
         //判定惩罚
-        if (currentNPC.data.healthCode == HealthCode.Red)
+        if (IsPersonAllowed(currentNPC.data) == false)
         {
             wrongCount++;
-            Debug.Log("放走红码人");
+            Debug.Log("放走异常人");
         }
 
         currentNPC.MoveTo(
@@ -160,16 +176,47 @@ public class LevelPersonManager : MonoBehaviour
         failCount++;
 
         //判定误伤
-        if (currentNPC.data.healthCode == HealthCode.Green)
+        if (IsPersonAllowed(currentNPC.data))
         {
             wrongCount++;
-            Debug.Log("误伤绿码人");
+            Debug.Log("误伤健康人");
         }
 
         currentNPC.MoveTo(
             ((RectTransform)failPoint).anchoredPosition,
             OnPersonLeave
         );
+    }
+
+    bool IsPersonAllowed(PersonData p)
+    {
+        LevelConfig config = LevelManager.Instance.levels[
+            LevelManager.Instance.currentLevelIndex
+        ];
+        if(!p.hasMask) return false;
+        foreach (var item in config.enabledChecks)
+        {
+            switch (item)
+            {
+                case CheckItem.Mask:
+                    if (!p.hasMask) return false;
+                    break;
+
+                case CheckItem.Temperature:
+                    if (p.temperature >= 38f) return false;
+                    break;
+
+                case CheckItem.Nucleic:
+                    if (p.nucleic == NucleicResult.Positive) return false;
+                    break;
+
+                case CheckItem.HealthCode:
+                    if (p.healthCode == HealthCode.Red || p.healthCode == HealthCode.Yellow) return false;
+                    break;
+            }
+        }
+
+        return true;
     }
 
     void OnPersonLeave()
@@ -200,5 +247,47 @@ public class LevelPersonManager : MonoBehaviour
         float angle = Mathf.Lerp(startAngle, endAngle, progress);
 
         clockHand.localRotation = Quaternion.Euler(0, 0, angle);
+    }
+
+    public void ResetForNewLevel()
+    {
+        resultPanel.SetActive(false);
+
+        // ===== 1. 清理流程状态 =====
+        currentIndex = 0;
+        currentNPC = null;
+        isPersonMoving = false;
+
+        // ===== 2. 清理统计 =====
+        passCount = 0;
+        failCount = 0;
+        wrongCount = 0;
+
+        // ===== 3. 清理 UI =====
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+
+        // 重置时钟
+        if (clockHand != null)
+            clockHand.localRotation = Quaternion.Euler(0, 0, startAngle);
+
+
+        // ===== 4. 清理场景中残留 NPC =====
+        foreach (Transform child in spawnPoint.parent)
+        {
+            if (child.GetComponent<PersonController>() != null)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        // ===== 5. 重新生成本关数据 =====
+        persons.Clear();
+        GeneratePersons();
+
+        // ===== 6. 开始本关 =====
+        ShowNextPerson();
+
+        Debug.Log("关卡已重置，开始新一关");
     }
 }

@@ -1,3 +1,4 @@
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -20,14 +21,21 @@ public class CottonTest : MonoBehaviour,
     public Sprite testKitBeforeSprite;
     public Sprite testKitAfterSprite;
 
+    [Header("è¯•ç®¡æ¶²ä½“")]
+    public Image liquidImage;
+    public Color negativeColor = Color.clear;   // é˜´æ€§ï¼šä¸å˜ / é€æ˜
+    public Color positiveColor = new Color(0.6f, 0f, 0.8f); // ç´«è‰²
+
+    private PersonData currentPerson;
+
     private RectTransform currentSwab;
     private bool isDragging = false;
 
     private enum CottonState
     {
         None,
-        Checking,   // ÒÑÔÚ Human ¼ì²â
-        Finished    // ÒÑÍê³É
+        Checking,   // å·²åœ¨ Human æ£€æµ‹
+        Finished    // å·²å®Œæˆ
     }
 
     private CottonState state = CottonState.None;
@@ -57,7 +65,7 @@ public class CottonTest : MonoBehaviour,
 
         SetSwabPosition(eventData);
 
-        //ÍÏµ½ Human ÉÏ£¬ÇÒ»¹Ã»¼ì²â¹ı
+        //æ‹–åˆ° Human ä¸Šï¼Œä¸”è¿˜æ²¡æ£€æµ‹è¿‡
         if (state == CottonState.None && IsOverlapping(currentSwab, humanArea))
         {
             StartChecking();
@@ -70,7 +78,7 @@ public class CottonTest : MonoBehaviour,
 
         isDragging = false;
 
-        //Ö»ÓĞ¼ì²âÍê³Éºó£¬²ÅÄÜ·ÅÈëÊÔ¼ÁºĞ
+        //åªæœ‰æ£€æµ‹å®Œæˆåï¼Œæ‰èƒ½æ”¾å…¥è¯•å‰‚ç›’
         if (state == CottonState.Checking && IsOverlapping(currentSwab, testKitArea))
         {
             FinishTest();
@@ -81,12 +89,12 @@ public class CottonTest : MonoBehaviour,
         }
     }
 
-    // ========================= ºËĞÄÂß¼­ =========================
+    // ========================= æ ¸å¿ƒé€»è¾‘ =========================
 
     private void StartChecking()
     {
         state = CottonState.Checking;
-        Debug.Log("ÕıÔÚ¼ì²â");
+        Debug.Log("æ­£åœ¨æ£€æµ‹");
 
         if (humanAnimator != null)
         {
@@ -98,20 +106,58 @@ public class CottonTest : MonoBehaviour,
     {
         state = CottonState.Finished;
 
-        // ¸Ä±äÊÔ¼ÁºĞÍ¼Æ¬
         if (testKitImage != null && testKitAfterSprite != null)
         {
             testKitImage.sprite = testKitAfterSprite;
         }
 
-        // Ïú»ÙÃŞÇ©
         Destroy(currentSwab.gameObject);
         currentSwab = null;
 
-        Debug.Log("ºËËá¼ì²âÍê³É¡£");
+        //å¼€å§‹æ˜¾ç¤ºæ ¸é…¸ç»“æœ
+        StartCoroutine(ShowNucleicResult());
+
+        Debug.Log("æ ¸é…¸æ£€æµ‹å®Œæˆï¼Œç­‰å¾…ååº”ç»“æœ...");
     }
 
-    // ========================= ¹¤¾ß·½·¨ =========================
+    private IEnumerator ShowNucleicResult()
+    {
+        float waitTime = Random.Range(5f, 10f);
+        yield return new WaitForSeconds(waitTime);
+
+        if (currentPerson == null || liquidImage == null)
+            yield break;
+
+        // é˜´æ€§ï¼šä¸å˜è‰²
+        if (currentPerson.nucleic == NucleicResult.Negative)
+        {
+            Debug.Log("æ ¸é…¸ç»“æœï¼šé˜´æ€§");
+            yield break;
+        }
+
+        // é˜³æ€§ï¼šé€æ¸å˜ç´«
+        Debug.Log("æ ¸é…¸ç»“æœï¼šé˜³æ€§ï¼Œè¯•ç®¡å˜è‰²");
+
+        float duration = 1.5f;
+        float t = 0f;
+
+        Color startColor = liquidImage.color;
+
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            liquidImage.color = Color.Lerp(
+                startColor,
+                positiveColor,
+                t / duration
+            );
+            yield return null;
+        }
+
+        liquidImage.color = positiveColor;
+    }
+
+    // ========================= å·¥å…·æ–¹æ³• =========================
 
     private void SetSwabPosition(PointerEventData eventData)
     {
@@ -146,13 +192,15 @@ public class CottonTest : MonoBehaviour,
         humanArea = area;
     }
 
-    public void ResetForNextPerson(RectTransform newHumanArea, Animator newAnimator)
+    public void ResetForNextPerson(
+    RectTransform newHumanArea,
+    Animator newAnimator,
+    PersonData personData
+)
     {
-        // ÖØÖÃ×´Ì¬
         state = CottonState.None;
         isDragging = false;
 
-        // ÇåÀí²ĞÁôÃŞÇ©
         if (currentSwab != null)
         {
             Destroy(currentSwab.gameObject);
@@ -164,10 +212,39 @@ public class CottonTest : MonoBehaviour,
             testKitImage.sprite = testKitBeforeSprite;
         }
 
-        // °ó¶¨ĞÂµÄÈË
+        // é‡ç½®æ¶²ä½“é¢œè‰²
+        if (liquidImage != null)
+        {
+            liquidImage.color = negativeColor;
+        }
+
         humanArea = newHumanArea;
         humanAnimator = newAnimator;
-
-        Debug.Log("ÃŞÇ©¼ì²âÒÑÖØÖÃ£¬×¼±¸¼ì²âÏÂÒ»¸öÈË");
+        currentPerson = personData;
     }
+
+    //public void ResetForNextPerson(RectTransform newHumanArea, Animator newAnimator)
+    //{
+    //    // é‡ç½®çŠ¶æ€
+    //    state = CottonState.None;
+    //    isDragging = false;
+
+    //    // æ¸…ç†æ®‹ç•™æ£‰ç­¾
+    //    if (currentSwab != null)
+    //    {
+    //        Destroy(currentSwab.gameObject);
+    //        currentSwab = null;
+    //    }
+
+    //    if (testKitImage != null && testKitBeforeSprite != null)
+    //    {
+    //        testKitImage.sprite = testKitBeforeSprite;
+    //    }
+
+    //    // ç»‘å®šæ–°çš„äºº
+    //    humanArea = newHumanArea;
+    //    humanAnimator = newAnimator;
+
+    //    Debug.Log("æ£‰ç­¾æ£€æµ‹å·²é‡ç½®ï¼Œå‡†å¤‡æ£€æµ‹ä¸‹ä¸€ä¸ªäºº");
+    //}
 }

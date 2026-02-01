@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{5017981E-48D2-D928-7629-4D5A5BCFF26D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{53895B79-7D2B-BD82-693B-4C1D4583D9BC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{60270A0A-C851-814B-F762-4144BD1123B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{5017981E-48D2-D928-7629-4D5A5BCFF26D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5017981E-48D2-D928-7629-4D5A5BCFF26D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5017981E-48D2-D928-7629-4D5A5BCFF26D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{53895B79-7D2B-BD82-693B-4C1D4583D9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{53895B79-7D2B-BD82-693B-4C1D4583D9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{53895B79-7D2B-BD82-693B-4C1D4583D9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{53895B79-7D2B-BD82-693B-4C1D4583D9BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60270A0A-C851-814B-F762-4144BD1123B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60270A0A-C851-814B-F762-4144BD1123B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60270A0A-C851-814B-F762-4144BD1123B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60270A0A-C851-814B-F762-4144BD1123B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
