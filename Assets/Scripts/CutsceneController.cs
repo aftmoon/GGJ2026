@@ -9,13 +9,24 @@ public class CutsceneController : MonoBehaviour
     public float fadeDuration = 0.5f;  // 渐变时间
 
     private Coroutine fadeCoroutine;
+    [SerializeField]private Animator animator;
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+    }
 
     public void ShowCutsceneByLevel(int levelIndex)
     {
         if (fadeCoroutine != null)
             StopCoroutine(fadeCoroutine);
         //if (gameObject.activeSelf && levelIndex > 0) fadeCoroutine = StartCoroutine(FadeInAfterAnimation(levelIndex - 1));
-        if (levelIndex > 0) fadeCoroutine = StartCoroutine(FadeInAfterAnimation(levelIndex - 1));
+        if (levelIndex > 0)
+        {
+            StartCoroutine(FadeInAfterAnimation((levelIndex - 1) * 3 ));
+            StartCoroutine(FadeInAfterAnimation((levelIndex - 1) * 3 + 1));
+            StartCoroutine(FadeInAfterAnimation((levelIndex - 1) * 3 + 2));
+        }
 
     }
 
@@ -51,5 +62,16 @@ public class CutsceneController : MonoBehaviour
 
         c.a = 1f;
         img.color = c;
+    }
+
+    public void AnimatorSetBool()
+    {
+        if(animator != null) 
+            animator.SetBool("GameEnd", true);
+    }
+
+    public void OnGameEndAnimationFinished()
+    {
+        LevelManager.Instance.QuitGame();
     }
 }

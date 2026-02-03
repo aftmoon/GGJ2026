@@ -1,3 +1,4 @@
+ï»¿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ public class LevelManager : MonoBehaviour
     public List<LevelConfig> levels;
     public int currentLevelIndex = 0;
 
-    [Header("¼ì²âÏµÍ³ÒıÓÃ")]
+    [Header("æ£€æµ‹ç³»ç»Ÿå¼•ç”¨")]
     public GameObject maskCheck;
     public GameObject temperatureCheck;
     public GameObject nucleicCheck;
@@ -17,9 +18,10 @@ public class LevelManager : MonoBehaviour
 
     public LevelPersonManager levelPersonManager;
 
-    [Header("¹ı³¡¶¯»­")]
+    [Header("è¿‡åœºåŠ¨ç”»")]
     public GameObject cutscene;
     public CutsceneController cutsceneController;
+    public GameObject ending;
 
     private void Awake()
     {
@@ -35,7 +37,7 @@ public class LevelManager : MonoBehaviour
     {
         if (index < 0 || index >= levels.Count)
         {
-            Debug.LogError("¹Ø¿¨Ë÷Òı·Ç·¨");
+            Debug.LogError("å…³å¡ç´¢å¼•éæ³•");
             return;
         }
 
@@ -47,7 +49,7 @@ public class LevelManager : MonoBehaviour
             cutsceneController.ShowCutsceneByLevel(index);
         }
 
-        // ÏÈÈ«²¿¹Ø±Õ
+        // å…ˆå…¨éƒ¨å…³é—­
         maskCheck.SetActive(false);
         temperatureCheck.SetActive(false);
         nucleicCheck.SetActive(false);
@@ -55,7 +57,7 @@ public class LevelManager : MonoBehaviour
         
         phoneScreen.SetActive(false);
 
-        // ÔÙ¸ù¾İÅäÖÃ¿ªÆô
+        // å†æ ¹æ®é…ç½®å¼€å¯
         foreach (var item in config.enabledChecks)
         {
             switch (item)
@@ -75,17 +77,26 @@ public class LevelManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"¼ÓÔØµÚ {index + 1} ¹Ø");
+        Debug.Log($"åŠ è½½ç¬¬ {index + 1} å…³");
     }
 
     public void NextLevel()
     {
         cutscene.SetActive(true);
+
         if (currentLevelIndex + 1 >= levels.Count)
         {
-            Debug.Log("ËùÓĞ¹Ø¿¨½áÊø");
+            Debug.Log("æ‰€æœ‰å…³å¡ç»“æŸ");
+
+            if (cutsceneController != null)
+            {
+                cutsceneController.ShowCutsceneByLevel(currentLevelIndex + 1);
+                cutsceneController.AnimatorSetBool(); // åªè´Ÿè´£è§¦å‘
+            }
+
             return;
         }
+
         LoadLevel(currentLevelIndex + 1);
 
         if (levelPersonManager != null)
@@ -94,8 +105,19 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+
     public void CutSceneDisppear()
     {
-        cutscene.SetActive(false);
+        if (currentLevelIndex < levels.Count)
+            cutscene.SetActive(false);
+    }
+
+    public void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+    Application.Quit();
+#endif
     }
 }

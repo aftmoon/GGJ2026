@@ -83,6 +83,12 @@ public class PhoneChatManager : MonoBehaviour
     {
         if (currentContact == null) return;
 
+        if (currentContact.isReplied)
+        {
+            Debug.Log("ÒÑ»Ø¸´¡£");
+            return;
+        }
+
         currentContact.messages.Add(new ChatMessage
         {
             content = "Got it",
